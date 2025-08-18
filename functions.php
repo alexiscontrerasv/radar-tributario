@@ -224,3 +224,90 @@ if (defined('JETPACK__VERSION')) {
 	require get_template_directory() . '/inc/jetpack.php';
 }
 
+
+
+/**
+ * REST: sumar una vista a un post
+ * POST /wp-json/rt/v1/view/<id>
+ */
+add_action('rest_api_init', function () {
+    register_rest_route('rt/v1', '/view/(?P<id>\d+)', [
+        'methods'             => 'POST',
+        'permission_callback' => '__return_true',
+        'callback'            => function ($req) {
+            $post_id = (int) $req['id'];
+            if (get_post_type($post_id) !== 'post') {
+                return new WP_Error('invalid', 'Solo posts', ['status' => 400]);
+            }
+
+            // Evitar bots simples
+            $ua = isset($_SERVER['HTTP_USER_AGENT']) ? strtolower($_SERVER['HTTP_USER_AGENT']) : '';
+            if ($ua === '' || preg_match('/bot|crawl|slurp|spider|facebook|whatsapp|preview|linkchecker|gzip/i', $ua)) {
+                return ['ok' => false, 'reason' => 'bot'];
+            }
+
+            $views = (int) get_post_meta($post_id, 'rt_views', true);
+            $views++;
+            update_post_meta($post_id, 'rt_views', $views);
+
+            return ['ok' => true, 'views' => $views];
+        },
+    ]);
+});
+
+/**
+ * Encolar el ping de vistas solo en páginas de post
+ */
+add_action('wp_enqueue_scripts', function () {
+    if (is_singular('post')) {
+        // Encola un manejador vacío y agrega JS inline (se carga en el footer)
+        wp_register_script('rt-views', '', [], null, true);
+        wp_enqueue_script('rt-views');
+
+        $post_id = get_queried_object_id();
+        $endpoint = esc_url_raw( home_url('/wp-json/rt/v1/view/') . $post_id );
+        $js = <<<JS
+(function(){
+  try {
+    var key = 'rtv_'+$post_id;
+    var last = parseInt(localStorage.getItem(key) || '0', 10);
+    var SIX_HOURS = 6*60*60*1000;
+
+    // Throttle: solo contar 1 vez cada 6 horas por usuario/post
+    if (!last || (Date.now() - last) > SIX_HOURS) {
+      fetch('$endpoint', {method:'POST', credentials:'same-origin', keepalive:true})
+        .catch(function(){/* noop */})
+        .finally(function(){ localStorage.setItem(key, String(Date.now())); });
+    }
+  } catch(e) { /* noop */ }
+})();
+JS;
+        wp_add_inline_script('rt-views', $js);
+    }
+}, 20);
+
+/**
+ * Query helper: obtener posts más vistos
+ */
+function rt_query_mas_vistos($args = []) {
+    $defaults = [
+        'post_type'           => 'post',
+        'posts_per_page'      => 6,
+        'ignore_sticky_posts' => true,
+        'meta_key'            => 'rt_views',
+        'orderby'             => 'meta_value_num',
+        'order'               => 'DESC',
+    ];
+    return new WP_Query( wp_parse_args($args, $defaults) );
+}
+
+/**
+ * (Opcional) Columna "Vistas" en el admin
+ */
+add_filter('manage_post_posts_columns', function($cols){
+    $cols['rt_views'] = 'Vistas';
+    return $cols;
+});
+add_action('manage_post_posts_custom_column', function($col, $post_id){
+    if ($col === 'rt_views') echo (int) get_post_meta($post_id, 'rt_views', true);
+}, 10, 2);

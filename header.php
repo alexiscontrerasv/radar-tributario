@@ -39,7 +39,7 @@
 	<meta name="twitter:image" content="img/og-image.jpg">
 
 	<!-- Favicon -->
-	<link rel="icon" type="image/x-icon" href="img/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="<?php echo get_template_directory_uri();?>/img/favicon.png">
 	<?php wp_head(); ?>
 </head>
 
@@ -76,7 +76,7 @@
 			<div class="flex items-center justify-between">
 				<!-- Logo -->
 				<div class="flex items-center">
-					<img src="img/radar-tributario-logo.png" alt="Radar Tributario" class="h-10 w-auto">
+					<img src="<?php echo get_template_directory_uri();?>/img/radar-tributario-logo.png" alt="Radar Tributario" class="h-10 w-auto">
 				</div>
 
 				<!-- Menú Desktop -->

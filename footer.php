@@ -17,7 +17,7 @@
             <div class="grid md:grid-cols-4 gap-8">
                 <!-- Logo y descripción -->
                 <div class="md:col-span-2">
-                    <img src="img/radar-tributario-logo.png" alt="Radar Tributario" class="h-8 w-auto mb-4">
+                    <img src="<?php echo get_template_directory_uri();?>/img/radar-tributario-logo.png" alt="Radar Tributario" class="h-8 w-auto mb-4">
                     <p class="text-gray-300 mb-6 max-w-md">
                         Tu fuente confiable de información tributaria en Chile. Análisis claro y práctico para PYMEs y profesionales.
                     </p>
