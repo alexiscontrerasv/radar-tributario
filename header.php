@@ -81,16 +81,15 @@
 
 				<!-- Menú Desktop -->
 				<div class="hidden md:flex items-center space-x-8">
-					<a href="index.html"
+					<a href="/"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Inicio</a>
-					<a href="noticias.html"
+					<a href="/noticias"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Noticias</a>
-					<a href="sobre-nosotros.html"
-						class="text-white hover:text-accent transition-colors duration-300 font-medium">Sobre
-						Nosotros</a>
-					<a href="blog.html"
+					<a href="/nosotros"
+						class="text-white hover:text-accent transition-colors duration-300 font-medium">Nosotros</a>
+					<a href="/blog"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Blog</a>
-					<a href="contacto.html"
+					<a href="/contacto"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Contacto</a>
 				</div>
 

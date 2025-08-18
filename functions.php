@@ -50,7 +50,7 @@ function radar_tributario_setup()
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus(
 		array(
-			'menu-1' => esc_html__('Primary', 'radar-tributario'),
+			'menu-principal' => esc_html__('Menú Principal', 'radar-tributario'),
 		)
 	);
 

@@ -1,4 +1,10 @@
-<?php get_header(); ?>
+<?php 
+/**
+ * Template Name: Página Home
+ * Description: Página para la descripción de los creadores, owners y otros.
+ */
+
+get_header(); ?>
 <main>
     <!-- Hero Section -->
     <section class="bg-bg-primary py-20 lg:py-32">
@@ -263,7 +269,7 @@
                 <!-- Imagen -->
                 <div class="relative">
                     <div class="bg-card-dark rounded-2xl p-8 shadow-2xl border border-border-subtle overflow-hidden">
-                        <img src="img/news-1.jpg" alt="Radar Tributario - Análisis y monitoreo"
+                        <img src="<?php echo get_template_directory_uri(); ?>/img/test.png" alt="Radar Tributario - Análisis y monitoreo"
                             class="w-full h-80 object-contain rounded-xl">
                     </div>
                 </div>
@@ -305,7 +311,7 @@
                                             <?php the_post_thumbnail('medium', ['class' => 'w-full h-48 md:h-32 object-cover rounded-lg']); ?>
                                         </a>
                                     <?php else: ?>
-                                        <img src="<?php echo get_template_directory_uri(); ?>/img/placeholder.jpg"
+                                        <img src="<?php echo get_template_directory_uri(); ?>/img/radar-tributario-logo.png"
                                             alt="<?php the_title(); ?>" class="w-full h-48 md:h-32 object-cover rounded-lg">
                                     <?php endif; ?>
                                 </div>

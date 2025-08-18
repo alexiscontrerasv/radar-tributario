@@ -418,5 +418,60 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    (function () {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+    function formatNumber(n, compact) {
+        if (compact) {
+        return Intl.NumberFormat('es-CL', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
+        }
+        return Intl.NumberFormat('es-CL').format(n);
+    }
+
+    function animateCounter(el, to, { duration = 1500, compact = false, suffix = '' } = {}) {
+        if (prefersReduced) { // sin animación
+        el.textContent = formatNumber(to, compact) + (suffix || '');
+        return;
+        }
+
+        const start = performance.now();
+        const from = 0;
+
+        function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = easeOutCubic(t);
+        const current = Math.round(from + (to - from) * eased);
+        el.textContent = formatNumber(current, compact) + (suffix || '');
+        if (t < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    }
+
+    // Observa cuando los counters entran al viewport
+    const counters = document.querySelectorAll('.counter');
+    if (!counters.length) return;
+
+    const once = new WeakSet();
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+        if (entry.isIntersecting && !once.has(entry.target)) {
+            once.add(entry.target);
+            const el = entry.target;
+            const to = parseFloat(el.getAttribute('data-to')) || 0;
+            const suffix = el.getAttribute('data-suffix') || '';
+            const compact = el.getAttribute('data-compact') === 'true';
+            animateCounter(el, to, { suffix, compact, duration: 1400 });
+        }
+        });
+    }, { threshold: 0.3 });
+
+    counters.forEach(el => io.observe(el));
+    })();
+
+
+
     console.log('🚀 Radar Tributario - JavaScript cargado correctamente');
 }); 
+
