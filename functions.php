@@ -138,16 +138,76 @@ add_action( 'widgets_init', 'radar_tributario_widgets_init' );
  * Enqueue scripts and styles.
  */
 function radar_tributario_scripts() {
-	wp_enqueue_style( 'radar-tributario-style', get_stylesheet_uri(), array(), _S_VERSION );
-	wp_style_add_data( 'radar-tributario-style', 'rtl', 'replace' );
+    $theme_uri  = get_template_directory_uri();
+    $theme_path = get_template_directory();
 
-	wp_enqueue_script( 'radar-tributario-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
+    // Estilo principal del tema
+    wp_enqueue_style( 'radar-tributario-style', get_stylesheet_uri(), array(), _S_VERSION );
+    wp_style_add_data( 'radar-tributario-style', 'rtl', 'replace' );
 
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		wp_enqueue_script( 'comment-reply' );
-	}
+    // Google Fonts
+    wp_enqueue_style(
+        'radar-tributario-google-fonts',
+        'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap',
+        array(),
+        null
+    );
+
+    // CSS personalizado
+    wp_enqueue_style(
+        'radar-tributario-custom',
+        $theme_uri . '/css/styles.css',
+        array(),
+        file_exists( $theme_path . '/css/styles.css' ) ? filemtime( $theme_path . '/css/styles.css' ) : _S_VERSION
+    );
+
+    // Tailwind config (debe cargarse ANTES del CDN)
+    wp_enqueue_script(
+        'tailwind-config',
+        $theme_uri . '/js/tailwind.config.js',
+        array(),
+        file_exists( $theme_path . '/js/tailwind.config.js' ) ? filemtime( $theme_path . '/js/tailwind.config.js' ) : _S_VERSION,
+        false // en <head>
+    );
+
+    // Tailwind CDN (depende de la config)
+    wp_enqueue_script(
+        'tailwindcdn',
+        'https://cdn.tailwindcss.com',
+        array( 'tailwind-config' ),
+        null,
+        false // en <head>
+    );
+
+    // Navigation.js (si lo usas)
+    if ( file_exists( $theme_path . '/js/navigation.js' ) ) {
+        wp_enqueue_script(
+            'radar-tributario-navigation',
+            $theme_uri . '/js/navigation.js',
+            array(),
+            filemtime( $theme_path . '/js/navigation.js' ),
+            true // en footer
+        );
+    }
+
+    // Main.js
+    if ( file_exists( $theme_path . '/js/main.js' ) ) {
+        wp_enqueue_script(
+            'radar-tributario-main',
+            $theme_uri . '/js/main.js',
+            array(), // agrega 'jquery' aquí si lo usas
+            filemtime( $theme_path . '/js/main.js' ),
+            true // en footer
+        );
+    }
+
+    // Habilitar respuesta de comentarios
+    if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+        wp_enqueue_script( 'comment-reply' );
+    }
 }
 add_action( 'wp_enqueue_scripts', 'radar_tributario_scripts' );
+
 
 /**
  * Implement the Custom Header feature.
