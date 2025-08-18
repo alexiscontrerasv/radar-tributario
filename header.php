@@ -43,7 +43,7 @@
 	<?php wp_head(); ?>
 </head>
 
-<body <?php body_class(); ?> class="bg-bg-primary text-text-primary font-montserrat">
+<body <?php body_class('bg-bg-primary text-text-primary font-montserrat'); ?>>
 	<?php wp_body_open(); ?>
 
 	<!-- Franja de Datos Económicos -->
