@@ -39,34 +39,32 @@
 	<meta name="twitter:image" content="img/og-image.jpg">
 
 	<!-- Favicon -->
-	<link rel="icon" type="image/x-icon" href="<?php echo get_template_directory_uri();?>/img/favicon.png">
+	<link rel="icon" type="image/x-icon" href="<?php echo get_template_directory_uri(); ?>/img/favicon.png">
 	<?php wp_head(); ?>
 </head>
 
 <body <?php body_class('bg-bg-primary text-text-primary font-montserrat'); ?>>
 	<?php wp_body_open(); ?>
 
+
 	<!-- Franja de Datos Económicos -->
 	<div class="economic-slider py-2">
+		<?php
+			global $NC_UF, $NC_UTM, $NC_UTA, $NC_USD, $NC_EUR, $NC_IPC;
+			$uf  = !empty($NC_UF)  ? $NC_UF  : '';
+			$utm = !empty($NC_UTM) ? $NC_UTM : '';
+			$uta = !empty($NC_UTA) ? $NC_UTA : '';
+			$usd = !empty($NC_USD) ? $NC_USD : '';
+			$eur = !empty($NC_EUR) ? $NC_EUR : '';
+			$ipc = !empty($NC_IPC) ? $NC_IPC : '';
+		?>
 		<div class="economic-slider-content">
-			<div class="economic-item">
-				<strong>UF:</strong> $36.123,45
-			</div>
-			<div class="economic-item">
-				<strong>UTM:</strong> $63.456,78
-			</div>
-			<div class="economic-item">
-				<strong>UTA:</strong> $1.234.567,89
-			</div>
-			<div class="economic-item">
-				<strong>DÓLAR:</strong> $890,12
-			</div>
-			<div class="economic-item">
-				<strong>EURO:</strong> $987,65
-			</div>
-			<div class="economic-item">
-				<strong>IPC:</strong> 0,3%
-			</div>
+			<div class="economic-item"><strong>UF:</strong> <?php echo esc_html($uf); ?></div>
+			<div class="economic-item"><strong>UTM:</strong> <?php echo esc_html($utm); ?></div>
+			<div class="economic-item"><strong>UTA:</strong> <?php echo esc_html($uta); ?></div>
+			<div class="economic-item"><strong>DÓLAR:</strong> <?php echo esc_html($usd); ?></div>
+			<div class="economic-item"><strong>EURO:</strong> <?php echo esc_html($eur); ?></div>
+			<div class="economic-item"><strong>IPC:</strong> <?php echo esc_html($ipc); ?></div>
 		</div>
 	</div>
 
@@ -76,7 +74,10 @@
 			<div class="flex items-center justify-between">
 				<!-- Logo -->
 				<div class="flex items-center">
-					<img src="<?php echo get_template_directory_uri();?>/img/radar-tributario-logo.png" alt="Radar Tributario" class="h-10 w-auto">
+					<a href="/">
+						<img src="<?php echo get_template_directory_uri(); ?>/img/radar-tributario-logo.png"
+							alt="Radar Tributario" class="h-10 w-auto">
+					</a>
 				</div>
 
 				<!-- Menú Desktop -->
@@ -106,16 +107,16 @@
 			<!-- Menú Móvil -->
 			<div id="mobile-menu" class="md:hidden hidden mt-4 pb-4 border-t border-border-subtle">
 				<div class="flex flex-col space-y-4 pt-4">
-					<a href="index.html"
+					<a href="/"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Inicio</a>
-					<a href="noticias.html"
+					<a href="/noticias"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Noticias</a>
-					<a href="sobre-nosotros.html"
+					<a href="/sobre-nosotros"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Sobre
 						Nosotros</a>
-					<a href="blog.html"
+					<a href="/blog"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Blog</a>
-					<a href="contacto.html"
+					<a href="/contacto"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Contacto</a>
 				</div>
 			</div>
