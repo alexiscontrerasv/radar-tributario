@@ -39,11 +39,11 @@
 	<meta name="twitter:image" content="img/og-image.jpg">
 
 	<!-- Favicon -->
-	<link rel="icon" type="image/x-icon" href="img/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="<?php echo get_template_directory_uri();?>/img/favicon.png">
 	<?php wp_head(); ?>
 </head>
 
-<body <?php body_class(); ?> class="bg-bg-primary text-text-primary font-montserrat">
+<body <?php body_class('bg-bg-primary text-text-primary font-montserrat'); ?>>
 	<?php wp_body_open(); ?>
 
 	<!-- Franja de Datos Económicos -->
@@ -76,21 +76,20 @@
 			<div class="flex items-center justify-between">
 				<!-- Logo -->
 				<div class="flex items-center">
-					<img src="img/radar-tributario-logo.png" alt="Radar Tributario" class="h-10 w-auto">
+					<img src="<?php echo get_template_directory_uri();?>/img/radar-tributario-logo.png" alt="Radar Tributario" class="h-10 w-auto">
 				</div>
 
 				<!-- Menú Desktop -->
 				<div class="hidden md:flex items-center space-x-8">
-					<a href="index.html"
+					<a href="/"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Inicio</a>
-					<a href="noticias.html"
+					<a href="/noticias"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Noticias</a>
-					<a href="sobre-nosotros.html"
-						class="text-white hover:text-accent transition-colors duration-300 font-medium">Sobre
-						Nosotros</a>
-					<a href="blog.html"
+					<a href="/nosotros"
+						class="text-white hover:text-accent transition-colors duration-300 font-medium">Nosotros</a>
+					<a href="/blog"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Blog</a>
-					<a href="contacto.html"
+					<a href="/contacto"
 						class="text-white hover:text-accent transition-colors duration-300 font-medium">Contacto</a>
 				</div>
 

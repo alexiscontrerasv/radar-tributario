@@ -1,4 +1,10 @@
-<?php get_header(); ?>
+<?php 
+/**
+ * Template Name: Página Home
+ * Description: Página para la descripción de los creadores, owners y otros.
+ */
+
+get_header(); ?>
 <main>
     <!-- Hero Section -->
     <section class="bg-bg-primary py-20 lg:py-32">
@@ -6,43 +12,79 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Contenido Hero -->
                 <div class="space-y-6">
-                    <h1 class="text-4xl lg:text-6xl font-rubik font-bold text-primary tracking-tight leading-tight">
-                        Nuevas <span class="text-accent">modificaciones</span> al IVA afectan a las PYMEs
-                    </h1>
-                    <p class="text-xl text-text-secondary leading-relaxed">
-                        El Servicio de Impuestos Internos anunció cambios importantes en el tratamiento del IVA para
-                        pequeñas y medianas empresas. Te explicamos qué cambió, cómo te afecta y qué hacer ahora.
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="blog.html"
-                            class="bg-accent hover:bg-accent/90 text-primary-dark font-semibold px-8 py-4 rounded-lg transition-all duration-300 inline-flex items-center justify-center btn-accent">
-                            Leer más
-                            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                            </svg>
-                        </a>
-                        <a href="noticias.html"
-                            class="border border-accent text-accent hover:bg-accent hover:text-primary-dark font-semibold px-8 py-4 rounded-lg transition-all duration-300 inline-flex items-center justify-center btn-secondary">
-                            Ver todas las noticias
-                        </a>
-                    </div>
+                    <?php
+                    // Obtener el último post publicado
+                    $latest = new WP_Query([
+                        'posts_per_page' => 1,
+                        'post_status' => 'publish',
+                    ]);
+                    if ($latest->have_posts()):
+                        while ($latest->have_posts()):
+                            $latest->the_post();
+                            $title = get_the_title();
+                            $words = explode(' ', $title);
+
+                            // Envolver palabras 2, 3 y 4 en span
+                            foreach ($words as $i => &$w) {
+                                if ($i >= 1 && $i <= 3) { // índice 1=2da palabra
+                                    $w = '<span class="text-accent">' . esc_html($w) . '</span>';
+                                } else {
+                                    $w = esc_html($w);
+                                }
+                            }
+                            $title_highlighted = implode(' ', $words);
+                            ?>
+                            <h1 class="text-4xl lg:text-6xl font-rubik font-bold text-primary tracking-tight leading-tight">
+                                <?php echo $title_highlighted; ?>
+                            </h1>
+
+                            <p class="text-xl text-text-secondary leading-relaxed">
+                                <?php echo wp_trim_words(get_the_excerpt(), 30, '...'); ?>
+                            </p>
+
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="<?php the_permalink(); ?>"
+                                    class="bg-accent hover:bg-accent/90 text-primary-dark font-semibold px-8 py-4 rounded-lg transition-all duration-300 inline-flex items-center justify-center btn-accent">
+                                    Leer más
+                                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                    </svg>
+                                </a>
+                                <a href="<?php echo get_permalink(get_option('page_for_posts')); ?>"
+                                    class="border border-accent text-accent hover:bg-accent hover:text-primary-dark font-semibold px-8 py-4 rounded-lg transition-all duration-300 inline-flex items-center justify-center btn-secondary">
+                                    Ver todas las noticias
+                                </a>
+                            </div>
+                        <?php endwhile;
+                        wp_reset_postdata();
+                    endif; ?>
                 </div>
 
                 <!-- Imagen Hero -->
                 <div class="relative">
-                    <div class="bg-card-dark rounded-2xl p-6 shadow-2xl">
-                        <img src="img/hero-post-image.jpg" alt="Análisis tributario PYMEs"
-                            class="w-full h-64 lg:h-80 object-cover rounded-xl">
-                        <div class="mt-4">
-                            <span class="text-accent text-sm font-medium">Última actualización</span>
-                            <p class="text-text-primary font-semibold mt-1">15 de Diciembre, 2024</p>
+                    <a href="<?php the_permalink(); ?>">
+                        <div class="bg-card-dark rounded-2xl p-6 shadow-2xl">
+                            <?php if (has_post_thumbnail()): ?>
+                                <?php the_post_thumbnail('large', ['class' => 'w-full h-64 lg:h-80 object-cover rounded-xl']); ?>
+                            <?php else: ?>
+                                <img src="<?php echo get_template_directory_uri(); ?>/img/hero-post-image.jpg"
+                                    alt="<?php the_title_attribute(); ?>"
+                                    class="w-full h-64 lg:h-80 object-cover rounded-xl">
+                            <?php endif; ?>
+                            <div class="mt-4">
+                                <span class="text-accent text-sm font-medium">Última actualización</span>
+                                <p class="text-text-primary font-semibold mt-1">
+                                    <?php echo get_the_date('j \d\e F, Y'); ?>
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- Sección de Posts Destacados -->
     <section class="py-20 bg-bg-secondary">
@@ -57,111 +99,81 @@
             </div>
 
             <!-- Grid de Posts -->
+            <?php
+            // helper de lectura rápida (puedes moverlo a functions.php si quieres)
+            function rt_read_time_minutes($post_id = null, $wpm = 200)
+            {
+                $post_id = $post_id ?: get_the_ID();
+                $text = wp_strip_all_tags(get_post_field('post_content', $post_id));
+                $words = str_word_count($text);
+                return max(1, ceil($words / $wpm));
+            }
+
+            // query: top 3 por meta 'rt_views'
+            $q = new WP_Query([
+                'post_type' => 'post',
+                'posts_per_page' => 3,
+                'ignore_sticky_posts' => true,
+                'meta_key' => 'rt_views',
+                'orderby' => 'meta_value_num',
+                'order' => 'DESC',
+            ]);
+            ?>
+
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                <!-- Post 1 -->
-                <article
-                    class="bg-bg-primary rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group border border-border-subtle">
-                    <div class="relative overflow-hidden">
-                        <img src="img/post-1.jpg" alt="Declaración de renta 2024"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute top-4 left-4">
-                            <span
-                                class="bg-accent text-primary-dark text-xs font-semibold px-3 py-1 rounded-full">Destacado</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center text-text-secondary text-sm mb-3">
-                            <span>12 de Diciembre, 2024</span>
-                            <span class="mx-2">•</span>
-                            <span>5 min lectura</span>
-                        </div>
-                        <h3
-                            class="text-xl font-rubik font-semibold text-primary mb-3 group-hover:text-accent transition-colors duration-300">
-                            Guía completa: Declaración de Renta 2024
-                        </h3>
-                        <p class="text-text-secondary mb-4 leading-relaxed">
-                            Todo lo que necesitas saber sobre la declaración de renta del próximo año. Cambios
-                            importantes, fechas clave y consejos prácticos.
-                        </p>
-                        <a href="single-post.html"
-                            class="text-accent hover:text-accent/80 font-medium inline-flex items-center group-hover:translate-x-1 transition-all duration-300">
-                            Leer más
-                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                        </a>
-                    </div>
-                </article>
+                <?php if ($q->have_posts()):
+                    while ($q->have_posts()):
+                        $q->the_post(); ?>
+                        <article
+                            class="bg-bg-primary rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group border border-border-subtle">
+                            <div class="relative overflow-hidden">
+                                <?php if (has_post_thumbnail()): ?>
+                                    <?php the_post_thumbnail('medium_large', ['class' => 'w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300']); ?>
+                                <?php else: ?>
+                                    <img src="<?php echo esc_url(get_template_directory_uri() . '/img/post-placeholder.jpg'); ?>"
+                                        alt="<?php the_title_attribute(); ?>"
+                                        class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                                <?php endif; ?>
 
-                <!-- Post 2 -->
-                <article
-                    class="bg-bg-primary rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group border border-border-subtle">
-                    <div class="relative overflow-hidden">
-                        <img src="img/post-2.jpg" alt="Facturación electrónica"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute top-4 left-4">
-                            <span
-                                class="bg-accent text-primary-dark text-xs font-semibold px-3 py-1 rounded-full">Nuevo</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center text-text-secondary text-sm mb-3">
-                            <span>10 de Diciembre, 2024</span>
-                            <span class="mx-2">•</span>
-                            <span>4 min lectura</span>
-                        </div>
-                        <h3
-                            class="text-xl font-rubik font-semibold text-primary mb-3 group-hover:text-accent transition-colors duration-300">
-                            Facturación Electrónica: Obligatorio desde 2025
-                        </h3>
-                        <p class="text-text-secondary mb-4 leading-relaxed">
-                            El SII implementa la facturación electrónica obligatoria. Conoce los plazos, requisitos y
-                            cómo preparar tu empresa para este cambio.
-                        </p>
-                        <a href="single-post.html"
-                            class="text-accent hover:text-accent/80 font-medium inline-flex items-center group-hover:translate-x-1 transition-all duration-300">
-                            Leer más
-                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                        </a>
-                    </div>
-                </article>
+                                <div class="absolute top-4 left-4">
+                                    <span class="bg-accent text-primary-dark text-xs font-semibold px-3 py-1 rounded-full">Más
+                                        visto</span>
+                                </div>
+                            </div>
 
-                <!-- Post 3 -->
-                <article
-                    class="bg-bg-primary rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group border border-border-subtle">
-                    <div class="relative overflow-hidden">
-                        <img src="img/post-3.jpg" alt="Beneficios tributarios PYMEs"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center text-text-secondary text-sm mb-3">
-                            <span>8 de Diciembre, 2024</span>
-                            <span class="mx-2">•</span>
-                            <span>6 min lectura</span>
-                        </div>
-                        <h3
-                            class="text-xl font-rubik font-semibold text-primary mb-3 group-hover:text-accent transition-colors duration-300">
-                            Beneficios Tributarios para PYMEs 2025
-                        </h3>
-                        <p class="text-text-secondary mb-4 leading-relaxed">
-                            Descubre todos los beneficios y exenciones disponibles para pequeñas y medianas empresas en
-                            el próximo año fiscal.
-                        </p>
-                        <a href="single-post.html"
-                            class="text-accent hover:text-accent/80 font-medium inline-flex items-center group-hover:translate-x-1 transition-all duration-300">
-                            Leer más
-                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                                </path>
-                            </svg>
-                        </a>
-                    </div>
-                </article>
+                            <div class="p-6">
+                                <div class="flex items-center text-text-secondary text-sm mb-3">
+                                    <span><?php echo esc_html(get_the_date('j \d\e F, Y')); ?></span>
+                                    <span class="mx-2">•</span>
+                                    <span><?php echo rt_read_time_minutes(); ?> min lectura</span>
+                                </div>
+
+                                <h3
+                                    class="text-xl font-rubik font-semibold text-primary mb-3 group-hover:text-accent transition-colors duration-300">
+                                    <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                                </h3>
+
+                                <p class="text-text-secondary mb-4 leading-relaxed">
+                                    <?php echo esc_html(wp_trim_words(get_the_excerpt(), 26, '…')); ?>
+                                </p>
+
+                                <a href="<?php the_permalink(); ?>"
+                                    class="text-accent hover:text-accent/80 font-medium inline-flex items-center group-hover:translate-x-1 transition-all duration-300">
+                                    Leer más
+                                    <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                        </path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </article>
+                    <?php endwhile;
+                    wp_reset_postdata();
+                else: ?>
+                    <p class="col-span-full text-text-secondary">Aún no hay datos de “más vistos”.</p>
+                <?php endif; ?>
             </div>
+
 
             <!-- Botón Ver Todas -->
             <div class="text-center">
@@ -202,7 +214,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h4 class="font-rubik font-semibold text-primary mb-1">Minimalismo</h4>
+                                <h4 class="font-rubik font-semibold text-primary mb-1">Precisión</h4>
                                 <p class="text-text-secondary text-sm">Información clara y directa, sin complicaciones
                                     innecesarias.</p>
                             </div>
@@ -257,7 +269,7 @@
                 <!-- Imagen -->
                 <div class="relative">
                     <div class="bg-card-dark rounded-2xl p-8 shadow-2xl border border-border-subtle overflow-hidden">
-                        <img src="img/news-1.jpg" alt="Radar Tributario - Análisis y monitoreo"
+                        <img src="<?php echo get_template_directory_uri(); ?>/img/test.png" alt="Radar Tributario - Análisis y monitoreo"
                             class="w-full h-80 object-contain rounded-xl">
                     </div>
                 </div>
@@ -279,111 +291,68 @@
 
             <!-- Lista de Noticias -->
             <div class="space-y-8">
-                <!-- Noticia 1 -->
-                <article
-                    class="bg-bg-primary rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-border-subtle">
-                    <div class="grid md:grid-cols-3 gap-6 items-center">
-                        <div class="md:col-span-1">
-                            <img src="img/news-1.jpg" alt="SII actualiza plataforma"
-                                class="w-full h-48 md:h-32 object-cover rounded-lg">
-                        </div>
-                        <div class="md:col-span-2">
-                            <div class="flex items-center text-text-secondary text-sm mb-2">
-                                <span>14 de Diciembre, 2024</span>
-                                <span class="mx-2">•</span>
-                                <span class="bg-accent/20 text-accent px-2 py-1 rounded text-xs">Actualización</span>
-                            </div>
-                            <h3
-                                class="text-xl font-rubik font-semibold text-primary mb-3 hover:text-accent transition-colors duration-300">
-                                SII actualiza plataforma de declaraciones: Nuevas funcionalidades disponibles
-                            </h3>
-                            <p class="text-text-secondary mb-4 leading-relaxed">
-                                El Servicio de Impuestos Internos lanzó una nueva versión de su plataforma web con
-                                mejoras en la experiencia de usuario y nuevas herramientas para la declaración de
-                                impuestos.
-                            </p>
-                            <a href="single-post.html"
-                                class="text-accent hover:text-accent/80 font-medium inline-flex items-center">
-                                Leer noticia completa
-                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </article>
+                <?php
+                $latest_posts = new WP_Query([
+                    'post_type' => 'post',
+                    'posts_per_page' => 3,
+                    'post_status' => 'publish'
+                ]);
 
-                <!-- Noticia 2 -->
-                <article
-                    class="bg-bg-primary rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-border-subtle">
-                    <div class="grid md:grid-cols-3 gap-6 items-center">
-                        <div class="md:col-span-1">
-                            <img src="img/news-2.jpg" alt="Cambios en retenciones"
-                                class="w-full h-48 md:h-32 object-cover rounded-lg">
-                        </div>
-                        <div class="md:col-span-2">
-                            <div class="flex items-center text-text-secondary text-sm mb-2">
-                                <span>13 de Diciembre, 2024</span>
-                                <span class="mx-2">•</span>
-                                <span class="bg-accent/20 text-accent px-2 py-1 rounded text-xs">Legislación</span>
+                if ($latest_posts->have_posts()):
+                    while ($latest_posts->have_posts()):
+                        $latest_posts->the_post();
+                        ?>
+                        <article
+                            class="bg-bg-primary rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-border-subtle">
+                            <div class="grid md:grid-cols-3 gap-6 items-center">
+                                <div class="md:col-span-1">
+                                    <?php if (has_post_thumbnail()): ?>
+                                        <a href="<?php the_permalink(); ?>">
+                                            <?php the_post_thumbnail('medium', ['class' => 'w-full h-48 md:h-32 object-cover rounded-lg']); ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <img src="<?php echo get_template_directory_uri(); ?>/img/radar-tributario-logo.png"
+                                            alt="<?php the_title(); ?>" class="w-full h-48 md:h-32 object-cover rounded-lg">
+                                    <?php endif; ?>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <div class="flex items-center text-text-secondary text-sm mb-2">
+                                        <span><?php echo get_the_date(); ?></span>
+                                        <span class="mx-2">•</span>
+                                        <span class="bg-accent/20 text-accent px-2 py-1 rounded text-xs">
+                                            <?php
+                                            $cat = get_the_category();
+                                            echo $cat ? esc_html($cat[0]->name) : 'General';
+                                            ?>
+                                        </span>
+                                    </div>
+                                    <h3
+                                        class="text-xl font-rubik font-semibold text-primary mb-3 hover:text-accent transition-colors duration-300">
+                                        <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                                    </h3>
+                                    <p class="text-text-secondary mb-4 leading-relaxed">
+                                        <?php echo wp_trim_words(get_the_excerpt(), 25, '...'); ?>
+                                    </p>
+                                    <a href="<?php the_permalink(); ?>"
+                                        class="text-accent hover:text-accent/80 font-medium inline-flex items-center">
+                                        Leer noticia completa
+                                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
-                            <h3
-                                class="text-xl font-rubik font-semibold text-primary mb-3 hover:text-accent transition-colors duration-300">
-                                Nuevas reglas para retenciones de IVA en servicios digitales
-                            </h3>
-                            <p class="text-text-secondary mb-4 leading-relaxed">
-                                El Ministerio de Hacienda anunció modificaciones importantes en las reglas de retención
-                                de IVA para servicios digitales, afectando principalmente a plataformas de streaming y
-                                software.
-                            </p>
-                            <a href="single-post.html"
-                                class="text-accent hover:text-accent/80 font-medium inline-flex items-center">
-                                Leer noticia completa
-                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Noticia 3 -->
-                <article
-                    class="bg-bg-primary rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-border-subtle">
-                    <div class="grid md:grid-cols-3 gap-6 items-center">
-                        <div class="md:col-span-1">
-                            <img src="img/news-3.jpg" alt="Plazos tributarios 2025"
-                                class="w-full h-48 md:h-32 object-cover rounded-lg">
-                        </div>
-                        <div class="md:col-span-2">
-                            <div class="flex items-center text-text-secondary text-sm mb-2">
-                                <span>12 de Diciembre, 2024</span>
-                                <span class="mx-2">•</span>
-                                <span class="bg-accent/20 text-accent px-2 py-1 rounded text-xs">Calendario</span>
-                            </div>
-                            <h3
-                                class="text-xl font-rubik font-semibold text-primary mb-3 hover:text-accent transition-colors duration-300">
-                                Calendario tributario 2025: Fechas importantes para tu empresa
-                            </h3>
-                            <p class="text-text-secondary mb-4 leading-relaxed">
-                                Conoce todas las fechas clave del calendario tributario 2025, incluyendo plazos de
-                                declaraciones, pagos de impuestos y obligaciones formales para diferentes tipos de
-                                contribuyentes.
-                            </p>
-                            <a href="single-post.html"
-                                class="text-accent hover:text-accent/80 font-medium inline-flex items-center">
-                                Leer noticia completa
-                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </article>
+                        </article>
+                        <?php
+                    endwhile;
+                    wp_reset_postdata();
+                else:
+                    echo '<p>No hay noticias publicadas aún.</p>';
+                endif;
+                ?>
             </div>
+
         </div>
     </section>
 
