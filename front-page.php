@@ -51,7 +51,7 @@ get_header(); ?>
                                             d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                                     </svg>
                                 </a>
-                                <a href="<?php echo get_permalink(get_option('page_for_posts')); ?>"
+                                <a href="/noticias"
                                     class="border border-accent text-accent hover:bg-accent hover:text-primary-dark font-semibold px-8 py-4 rounded-lg transition-all duration-300 inline-flex items-center justify-center btn-secondary">
                                     Ver todas las noticias
                                 </a>
@@ -177,7 +177,7 @@ get_header(); ?>
 
             <!-- Botón Ver Todas -->
             <div class="text-center">
-                <a href="blog.html"
+                <a href="/blog"
                     class="bg-accent hover:bg-accent/90 text-primary-dark font-semibold px-8 py-4 rounded-lg transition-all duration-300 inline-flex items-center btn-accent">
                     Ver todas las publicaciones
                     <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
